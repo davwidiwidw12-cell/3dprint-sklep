@@ -20,7 +20,7 @@ export default function SignIn() {
       email,
       password,
       redirect: true,
-      callbackUrl: "/admin", // Redirect to admin/profile based on role logic in middleware/nextauth
+      callbackUrl: "/", // Redirect to home page
     });
     
     if (result?.error) {
