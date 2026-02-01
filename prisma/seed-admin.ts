@@ -1,36 +1,40 @@
-import { prisma } from "../src/lib/prisma";
-import bcrypt from "bcryptjs";
+import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
+
+const prisma = new PrismaClient()
 
 async function main() {
-  const adminEmail = "admin@3dprint.pl";
-  const password = "admin"; // Simple password for easy login
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const email = 'admin@maikeldrukuje.pl'
+  const password = 'MaikelDrukuje!2025Bezpieczne'
+  const hashedPassword = await bcrypt.hash(password, 10)
 
-  const user = await prisma.user.upsert({
-    where: { email: adminEmail },
+  await prisma.user.upsert({
+    where: { email },
     update: {
       password: hashedPassword,
-      role: "ADMIN",
+      role: 'ADMIN',
       emailVerified: new Date(),
     },
     create: {
-      email: adminEmail,
-      name: "Admin",
+      email,
       password: hashedPassword,
-      role: "ADMIN",
+      role: 'ADMIN',
       emailVerified: new Date(),
+      name: 'Admin',
     },
-  });
+  })
 
-  console.log({ user });
+  console.log('Konto admina gotowe!')
+  console.log('Login: ' + email)
+  console.log('Hasło: ' + password)
 }
 
 main()
   .then(async () => {
-    await prisma.$disconnect();
+    await prisma.$disconnect()
   })
   .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
+    console.error(e)
+    await prisma.$disconnect()
+    process.exit(1)
+  })

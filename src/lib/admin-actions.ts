@@ -24,61 +24,66 @@ async function saveFile(file: File): Promise<string> {
 }
 
 export async function createProduct(formData: FormData) {
-  const name = formData.get("name") as string;
-  const description = formData.get("description") as string;
-  const basePrice = Number(formData.get("basePrice"));
-  // const categoryId = formData.get("categoryId") as string;
-  const minOrderQuantity = Number(formData.get("minOrderQuantity")) || 1;
-  const isActive = formData.get("isActive") === "on";
-  
-  // Attributes
-  const hasMount = formData.get("hasMount") === "on";
-  const isLarge = formData.get("isLarge") === "on";
+  try {
+    const name = formData.get("name") as string;
+    const description = formData.get("description") as string;
+    const basePrice = Number(formData.get("basePrice"));
+    // const categoryId = formData.get("categoryId") as string;
+    const minOrderQuantity = Number(formData.get("minOrderQuantity")) || 1;
+    const isActive = formData.get("isActive") === "on";
+    
+    // Attributes
+    const hasMount = formData.get("hasMount") === "on";
+    const isLarge = formData.get("isLarge") === "on";
 
-  // Pricing tiers
-  const pricingTiersJson = formData.get("pricingTiers") as string;
-  const pricingTiers = pricingTiersJson ? JSON.parse(pricingTiersJson) : [];
+    // Pricing tiers
+    const pricingTiersJson = formData.get("pricingTiers") as string;
+    const pricingTiers = pricingTiersJson ? JSON.parse(pricingTiersJson) : [];
 
-  // Images handling
-  const images = formData.getAll("images") as File[];
-  const imageUrls: string[] = [];
+    // Images handling
+    const images = formData.getAll("images") as File[];
+    const imageUrls: string[] = [];
 
-  for (const image of images) {
-    if (image.size > 0) {
-      const url = await saveFile(image);
-      imageUrls.push(url);
-    }
-  }
-
-  // Create Product
-  const product = await prisma.product.create({
-    data: {
-      name,
-      description,
-      slug: name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') + '-' + Date.now().toString().slice(-4), // Simple slug gen
-      basePrice,
-      // categoryId,
-      minOrderQuantity,
-      isActive,
-      hasMount,
-      isLarge,
-      pricing: {
-        create: pricingTiers.map((tier: any) => ({
-          minQuantity: tier.minQuantity,
-          price: tier.price,
-        })),
-      },
-      images: {
-        create: imageUrls.map((url) => ({
-          url
-        }))
+    for (const image of images) {
+      if (image.size > 0) {
+        const url = await saveFile(image);
+        imageUrls.push(url);
       }
-    },
-    // include: { category: true } // Just to verify
-  });
+    }
 
-  revalidatePath("/admin/products");
-  revalidatePath("/products");
+    // Create Product
+    const product = await prisma.product.create({
+      data: {
+        name,
+        description,
+        slug: name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') + '-' + Date.now().toString().slice(-4), // Simple slug gen
+        basePrice,
+        // categoryId,
+        minOrderQuantity,
+        isActive,
+        hasMount,
+        isLarge,
+        pricing: {
+          create: pricingTiers.map((tier: any) => ({
+            minQuantity: tier.minQuantity,
+            price: tier.price,
+          })),
+        },
+        images: {
+          create: imageUrls.map((url) => ({
+            url
+          }))
+        }
+      },
+      // include: { category: true } // Just to verify
+    });
+
+    revalidatePath("/admin/products");
+    revalidatePath("/products");
+  } catch (error) {
+    console.error("Error creating product:", error);
+    throw new Error("Błąd podczas tworzenia produktu: " + (error as Error).message);
+  }
 }
 
 export async function updateProduct(id: string, formData: FormData) {
