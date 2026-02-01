@@ -2,10 +2,9 @@
   "name": "3dprint",
   "version": "1.0.2",
   "description": "Profesjonalny sklep z drukiem 3D",
-  "main": "index.js",
   "scripts": {
-    "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate"
