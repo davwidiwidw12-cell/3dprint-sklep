@@ -69,4 +69,5 @@ export const authOptions = {
       return session;
     },
   },
+  trustHost: true,
 };
