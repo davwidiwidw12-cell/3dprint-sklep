@@ -49,6 +49,7 @@ export const authOptions = {
   session: {
     strategy: "jwt" as const,
   },
+  secret: "secret-random-string-123-hardcoded-fallback",
   pages: {
     signIn: "/auth/signin",
     error: "/auth/signin", // Redirect to signin on error to show message
