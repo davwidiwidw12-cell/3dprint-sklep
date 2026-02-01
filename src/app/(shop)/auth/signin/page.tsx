@@ -33,7 +33,7 @@ export default function SignIn() {
       <Card className="w-full max-w-md shadow-xl border-none">
         <CardHeader className="flex flex-col items-center space-y-4 pt-8">
           <Logo className="scale-125" />
-          <CardTitle className="text-2xl font-bold">Logowanie</CardTitle>
+          <CardTitle className="text-2xl font-bold">Logowanie (v2)</CardTitle>
         </CardHeader>
         <CardContent className="pb-8">
           <form onSubmit={handleSubmit} className="space-y-4">
