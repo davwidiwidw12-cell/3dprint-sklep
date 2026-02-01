@@ -33,3 +33,6 @@ next-env.d.ts
 
 # prisma
 /generated/prisma
+
+.vercel
+.env*.local
