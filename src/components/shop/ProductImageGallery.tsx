@@ -44,6 +44,7 @@ export function ProductImageGallery({ images, productName, hasMount }: ProductIm
           src={images[currentIndex].url}
           alt={`${productName} - Zdjęcie ${currentIndex + 1}`}
           fill
+          unoptimized
           sizes="(max-width: 768px) 100vw, 50vw"
           className="object-contain p-8 drop-shadow-md transition-all duration-300"
         />
@@ -91,6 +92,7 @@ export function ProductImageGallery({ images, productName, hasMount }: ProductIm
                 src={img.url}
                 alt={`Thumbnail ${idx + 1}`}
                 fill
+                unoptimized
                 className="object-cover"
               />
             </button>
