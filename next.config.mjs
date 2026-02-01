@@ -8,6 +8,10 @@ const withSerwist = withSerwistInit({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    env: {
+        NEXTAUTH_URL: 'https://maikeldrukuje.pl',
+        NEXTAUTH_SECRET: 'secret-random-string-123-hardcoded-fallback',
+    },
     eslint: {
         ignoreDuringBuilds: true,
     },
