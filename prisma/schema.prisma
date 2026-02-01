@@ -1,0 +1,184 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          String    @default("USER") // USER, ADMIN
+  
+  // Custom Verification
+  verificationCode        String?
+  verificationCodeExpires DateTime?
+  
+  // Customer details
+  phoneNumber   String?
+  street        String?
+  city          String?
+  postalCode    String?
+  country       String?
+
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+  
+  // Web Push Subscriptions
+  pushSubscriptions PushSubscription[]
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, endpoint]) // Prevent duplicate subs for same device/user
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Product {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  description String
+  basePrice   Decimal
+  minOrderQuantity Int      @default(1)
+  hasMount    Boolean       @default(false) 
+  isLarge     Boolean       @default(false)
+  // categoryId  String // Removed
+  // category    Category      @relation(fields: [categoryId], references: [id]) // Removed
+  images      ProductImage[]
+  pricing     PricingTier[]
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  orderItems  OrderItem[]
+}
+
+// model Category { // Removed
+//   id          String    @id @default(cuid())
+//   name        String
+//   slug        String    @unique
+//   products    Product[]
+// }
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  url       String
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model PricingTier {
+  id          String  @id @default(cuid())
+  minQuantity Int
+  price       Decimal
+  productId   String
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+// Order system replaces Inquiry
+
+
+model Order {
+  id              String      @id @default(cuid())
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  // User relation (optional for guest checkout if we allowed it, but req says account)
+  userId          String?
+  user            User?       @relation(fields: [userId], references: [id])
+  
+  // Contact & Shipping Info (Snapshot)
+  email           String
+  phone           String
+  fullName        String
+  addressLine1    String      // Street or Parcel Locker ID
+  addressLine2    String?
+  city            String
+  postalCode      String
+  country         String      @default("PL")
+  shippingMethod  String      // COURIER, LOCKER
+  
+  // Financials
+  subtotal        Decimal
+  shippingCost    Decimal
+  total           Decimal
+  
+  // Statuses
+  status          String      @default("PENDING") // PENDING, PAID, SHIPPED, CANCELLED
+  paymentMethod   String      // PAYPAL, BLIK
+  paymentStatus   String      @default("UNPAID")  // UNPAID, PAID
+  
+  trackingNumber  String?
+  notes           String?     // Custom order notes from user
+  
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  
+  quantity  Int
+  price     Decimal // Snapshot price at time of order
+  name      String  // Snapshot name
+  customDimensions String? // For custom size requests
+  customImageUrl   String? // For custom graphics
+}
+
+model Settings {
+  id                  String  @id @default(cuid())
+  shippingCost        Decimal @default(10.99)
+  freeShippingThreshold Decimal @default(200.00)
+}
