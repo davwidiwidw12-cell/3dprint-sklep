@@ -7,6 +7,11 @@ const nextConfig = {
     eslint: {
         ignoreDuringBuilds: true,
     },
+    experimental: {
+        serverActions: {
+            bodySizeLimit: '20mb',
+        },
+    },
     // output: 'standalone', // Uncomment for Docker optimization if needed
     images: {
         remotePatterns: [
